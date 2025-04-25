@@ -1,0 +1,7 @@
+node_modules/
+OneDrive/
+AppData/
+*.log
+*.dat
+*.ini
+*.bak
