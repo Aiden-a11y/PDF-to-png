@@ -8,5 +8,61 @@
 <body>
     <h1>Welcome to the CTK PDF to PNG Project</h1>
     <p>This is your web app!</p>
+
+    <!-- PDF 파일 업로드 -->
+    <input type="file" id="pdfFile" accept=".pdf" />
+    <button onclick="handleFile()">Convert to PNG</button>
+
+    <div id="output"></div>
+
+    <!-- PDF.js 라이브러리 로드 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script>
+        function handleFile() {
+            const fileInput = document.getElementById('pdfFile');
+            const file = fileInput.files[0];
+            if (file) {
+                convertPdfToPng(file);
+            } else {
+                alert("Please upload a PDF file.");
+            }
+        }
+
+        function convertPdfToPng(pdfFile) {
+            const fileReader = new FileReader();
+
+            fileReader.onload = function(event) {
+                const pdfData = new Uint8Array(event.target.result);
+                pdfjsLib.getDocument(pdfData).promise.then(function(pdf) {
+                    // 첫 번째 페이지를 예시로 변환
+                    pdf.getPage(1).then(function(page) {
+                        const scale = 1.5;
+                        const viewport = page.getViewport({ scale: scale });
+
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+
+                        const renderContext = {
+                            canvasContext: context,
+                            viewport: viewport
+                        };
+
+                        page.render(renderContext).promise.then(function() {
+                            const imgData = canvas.toDataURL();
+                            // 이미지로 출력
+                            const imgElement = document.createElement('img');
+                            imgElement.src = imgData;
+                            document.getElementById('output').appendChild(imgElement);
+                        });
+                    });
+                });
+            };
+
+            fileReader.readAsArrayBuffer(pdfFile);
+        }
+    </script>
 </body>
 </html>
+
